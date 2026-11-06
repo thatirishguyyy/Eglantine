@@ -338,6 +338,8 @@ public:
     Id write_storage_cas_loop_func{};
 
     Id load_global_func_u32{};
+    Id atomic_add_global_func_u32{};
+    Id atomic_umax_global_func_u32{};
     Id load_global_func_u32x2{};
     Id load_global_func_u32x4{};
     Id write_global_func_u32{};
