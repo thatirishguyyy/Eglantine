@@ -1053,6 +1053,30 @@ void EmitContext::DefineGlobalMemoryFunctions(const Info& info) {
         define(&StorageDefinitions::U32x2, storage_types.U32x2, U32[2], sizeof(u32[2]));
     std::tie(load_global_func_u32x4, write_global_func_u32x4) =
         define(&StorageDefinitions::U32x4, storage_types.U32x4, U32[4], sizeof(u32[4]));
+    const Id atomic_add_type{TypeFunction(U32[1], U64, U32[1])};
+    const Id atomic_add_func{OpFunction(U32[1], spv::FunctionControlMask::MaskNone, atomic_add_type)};
+    const Id atomic_add_addr{OpFunctionParameter(U64)};
+    const Id atomic_add_value{OpFunctionParameter(U32[1])};
+    define_body(&StorageDefinitions::U32, atomic_add_addr, storage_types.U32.element, 2, [&](Id pointer) { const Id scope{Const(static_cast<u32>(spv::Scope::Device))}; const Id semantics{u32_zero_value}; OpReturnValue(OpAtomicIAdd(U32[1], pointer, scope, semantics, atomic_add_value)); });
+    OpReturnValue(ConstantNull(U32[1]));
+    OpFunctionEnd();
+    atomic_add_global_func_u32 = atomic_add_func;
+    const Id atomic_umax_type{TypeFunction(U32[1], U64, U32[1])};
+    const Id atomic_umax_func{OpFunction(U32[1], spv::FunctionControlMask::MaskNone, atomic_umax_type)};
+    const Id atomic_umax_addr{OpFunctionParameter(U64)};
+    const Id atomic_umax_value{OpFunctionParameter(U32[1])};
+
+    define_body(&StorageDefinitions::U32, atomic_umax_addr, storage_types.U32.element, 2,
+        [&](Id pointer) {
+            const Id scope{Const(static_cast<u32>(spv::Scope::Device))};
+            const Id semantics{u32_zero_value};
+            OpReturnValue(OpAtomicUMax(U32[1], pointer, scope, semantics, atomic_umax_value));
+        });
+
+    OpReturnValue(ConstantNull(U32[1]));
+    OpFunctionEnd();
+
+    atomic_umax_global_func_u32 = atomic_umax_func;
 }
 
 void EmitContext::DefineRescalingInput(const Info& info) {
