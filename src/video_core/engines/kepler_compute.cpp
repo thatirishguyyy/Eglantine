@@ -325,8 +325,10 @@ bool KeplerCompute::ProcessNativeMethod(Core::System& system, u32 method, u32 ar
         return true;
     case 0xae: case 0xaf: case 0xb0: {
         const GPUVAddr qmd_address = GPUVAddr{native_registers[0xad]} << 8;
+        if (std::getenv("EDEN_NATIVE_DRAW_DIAGNOSTICS") != nullptr) {
         VideoCommon::TraceNativeQuery(9, memory_manager.GetID(), qmd_address,
             memory_manager.GpuToCpuAddress(qmd_address).value_or(0), method, argument, 0);
+        }
         if (method == 0xae || (method == 0xaf && !(argument & 2)) ||
             (method == 0xb0 && ((argument & 15) == 0 || (argument & 15) == 1))) return true;
         static const bool qmd_diagnostics = std::getenv("EDEN_NATIVE_DRAW_DIAGNOSTICS") != nullptr;
