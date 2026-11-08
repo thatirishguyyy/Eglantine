@@ -973,6 +973,8 @@ void MainWindow::InitializeWidgets() {
 
     shader_building_label = new QLabel();
     shader_building_label->setToolTip(tr("The amount of shaders currently being built"));
+    run_time_label = new QLabel();
+    run_time_label->setToolTip(tr("Real elapsed time since emulation started, including pauses."));
     res_scale_label = new QLabel();
     res_scale_label->setToolTip(tr("The current selected resolution scaling multiplier."));
     emu_speed_label = new QLabel();
@@ -987,8 +989,8 @@ void MainWindow::InitializeWidgets() {
         tr("Time taken to emulate a Switch frame, not counting framelimiting or v-sync. For "
            "full-speed emulation this should be at most 16.67 ms."));
 
-    for (auto& label : {shader_building_label, res_scale_label, emu_speed_label, game_fps_label,
-                        emu_frametime_label}) {
+    for (auto& label : {shader_building_label, run_time_label, res_scale_label, emu_speed_label,
+                        game_fps_label, emu_frametime_label}) {
         label->setVisible(false);
         label->setFrameStyle(QFrame::NoFrame);
         label->setContentsMargins(4, 0, 4, 0);
@@ -2118,6 +2120,9 @@ void MainWindow::BootGame(const QString& filename, Service::AM::FrontendAppletPa
         game_list->hide();
         game_list_placeholder->hide();
     }
+    run_timer.start();
+    run_time_label->setText(tr("Run: %1").arg(QStringLiteral("00:00:00")));
+    run_time_label->show();
     status_bar_update_timer.start(500);
     renderer_status_button->setDisabled(true);
     refresh_button->setDisabled(true);
@@ -2330,6 +2335,7 @@ void MainWindow::OnEmulationStopped() {
     // Disable status bar updates
     status_bar_update_timer.stop();
     shader_building_label->setVisible(false);
+    run_time_label->hide();
     res_scale_label->setVisible(false);
     emu_speed_label->setVisible(false);
     game_fps_label->setVisible(false);
@@ -4675,6 +4681,13 @@ void MainWindow::UpdateStatusBar() {
         status_bar_update_timer.stop();
         return;
     }
+
+    const auto seconds = run_timer.elapsed() / 1000;
+    const auto elapsed = QStringLiteral("%1:%2:%3")
+                             .arg(seconds / 3600, 2, 10, QLatin1Char('0'))
+                             .arg(seconds / 60 % 60, 2, 10, QLatin1Char('0'))
+                             .arg(seconds % 60, 2, 10, QLatin1Char('0'));
+    run_time_label->setText(tr("Run: %1").arg(elapsed));
 
     if (Settings::values.tas_enable)
         tas_label->setText(GetTasStateDescription());

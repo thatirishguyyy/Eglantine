@@ -528,6 +528,7 @@ private:
     // Status bar elements
     QLabel* message_label = nullptr;
     QLabel* shader_building_label = nullptr;
+    QLabel* run_time_label = nullptr;
     QLabel* res_scale_label = nullptr;
     QLabel* emu_speed_label = nullptr;
     QLabel* game_fps_label = nullptr;
@@ -545,6 +546,7 @@ private:
     QWidget* volume_popup = nullptr;
     QSlider* volume_slider = nullptr;
     QTimer status_bar_update_timer;
+    QElapsedTimer run_timer;
 
     // Stores what suffix to add to the FPS counter, e.g. Unlocked.
     QString m_fpsSuffix{};
